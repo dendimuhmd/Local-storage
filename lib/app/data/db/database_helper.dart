@@ -9,12 +9,13 @@ class DatabaseHelper {
   }
 
   factory DatabaseHelper() => _databaseHelper ?? DatabaseHelper._internal();
-  static late Database _database;
-  static String _tableName = 'notes';
+  static Database? _database;
+  final String _tableName = 'notes';
 // static String _tableName = 'notes';
 
-  Future<Database> get database async {
-    _database = await _initializeDb();
+  Future<Database?> get database async {
+    _database ??= _database = await _initializeDb();
+
     return _database;
   }
 
@@ -32,7 +33,7 @@ class DatabaseHelper {
   Future<void> updateNote(Notes note) async {
     final db = await database;
 
-    await db.update(
+    await db!.update(
       _tableName,
       note.toMap(),
       where: 'id = ?',
@@ -49,24 +50,24 @@ CREATE TABLE $_tableName (
 ''');
   }
 
-  Future<List<Notes>> insertNote(Notes notes) async {
+  Future<void> insertNote(Notes notes) async {
     final db = await database;
-    List<Map<String, dynamic>> result = await db.query(_tableName);
+    await db!.insert(_tableName, notes.toMap());
 // log('sukses');
     print('Data saved');
 
-    return result.map((e) => Notes.fromMap(e)).toList();
+    // return result.map((e) => Notes.fromMap(e)).toList();
   }
 
   Future<List<Notes>> getNotes() async {
     final db = await database;
-    final List<Map<String, dynamic>> result = await db.query(_tableName);
+    final List<Map<String, dynamic>> result = await db!.query(_tableName);
     return result.map((e) => Notes.fromMap(e)).toList();
   }
 
   Future<Notes> getNoteById(int id) async {
     final db = await database;
-    List<Map<String, dynamic>> results = await db.query(
+    List<Map<String, dynamic>> results = await db!.query(
       _tableName,
       where: 'id = ?',
       whereArgs: [id],
@@ -77,6 +78,6 @@ CREATE TABLE $_tableName (
 
   Future<int> removeFavList(int id) async {
     final db = await database;
-    return await db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
+    return await db!.delete(_tableName, where: 'id = ?', whereArgs: [id]);
   }
 }
